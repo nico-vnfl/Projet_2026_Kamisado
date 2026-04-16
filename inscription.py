@@ -17,14 +17,15 @@ def recvall(sock, n):
         data += packet
     return data
 
-def compute_move(state):
+def compute_move(msg):
+    state = msg["state"]
     board = state["board"]
     color = state["color"]
 
     for l in range(8):
         for c in range(8):
             case = board[l][c]
-            if case and case["player"] == 1 and case["color"] == color:
+            if case and case[0] == 1 and case[1] == color:
                 from_l, from_c = l, c
     
     if state["current"] == 0:
@@ -83,13 +84,12 @@ def start_server():
 
                         resp_data = json.dumps(response).encode()
                         packet = struct.pack("I", len(resp_data)) + resp_data
-
                         client.sendall(packet)
+                        
 
-                    elif msg["rerquest"] == "play":
-                        state = msg["state"]
-                        move = compute_move(state)
-                        send_move(client, move)
+                    elif msg["request"] == "play":
+                        move = compute_move(msg)
+                        send_move(client, move)   
 
 
     thread = threading.Thread(target=handler, daemon=True)
