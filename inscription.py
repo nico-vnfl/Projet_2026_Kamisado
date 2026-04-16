@@ -22,10 +22,12 @@ def compute_move(msg):
     board = state["board"]
     color = state["color"]
 
+    from_l = from_c = None #initialisation
+
     for l in range(8):
         for c in range(8):
             case = board[l][c]
-            if case and case[0] == 1 and (color is None or case[1] == color):
+            if case and case[0] == state["player"] and (color is None or case[1] == color):
                 from_l, from_c = l, c
     if from_l is None:
         print("ERREUR: pion introuvable")
