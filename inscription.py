@@ -35,6 +35,19 @@ def compute_move(state):
     
     return [[from_l, from_c], [from_l, from_c]]
 
+def send_move(client, move):
+    response = {
+        "response":"move",
+        "move": move
+    }
+
+    response_data = json.dumps(response).encode()
+    packet = struct.pack("I", len(response_data)) + response_data
+    client.sendall(packet)
+
+    print("[COUP ENVOYE]", move)
+
+    
 def start_server():
     def handler():
         with socket.socket() as s:
