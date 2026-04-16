@@ -17,7 +17,7 @@ def recvall(sock, n):
         data += packet
     return data
 
-def compute_move(msg):
+def compute_move(msg): #IA qui va tout droit 
     state = msg["state"]
     board = state["board"]
     color = state["color"]
@@ -27,7 +27,7 @@ def compute_move(msg):
     for l in range(8):
         for c in range(8):
             case = board[l][c]
-            if case and case[0] == state["player"] and (color is None or case[1] == color):
+            if case and case[0] == "Nico" and (color is None or case[1] == color):
                 from_l, from_c = l, c
     if from_l is None:
         print("ERREUR: pion introuvable")
@@ -45,7 +45,7 @@ def compute_move(msg):
     
     return [[from_l, from_c], [from_l, from_c]]
 
-def send_move(client, move):
+def send_move(client, move): #envoie le move en reponse
     response = {
         "response":"move",
         "move": move
@@ -58,7 +58,7 @@ def send_move(client, move):
     print("[COUP ENVOYE]", move)
 
 
-def start_server():
+def start_server(): 
     def handler():
         with socket.socket() as s:
             s.bind(("0.0.0.0", CLIENT_PORT))
