@@ -27,8 +27,12 @@ def compute_move(state):
             if case and case["player"] == 1 and case["color"] == color:
                 from_l, from_c = l, c
     
-    to_l = from_l - 1
-    to_c = from_c
+    if state["current"] == 0:
+        to_l = from_l - 1
+        to_c = from_c
+    if state["current"] == 1:
+        to_l = from_l + 1 
+        to_c = from_c
 
     if 0 <= to_l < 8 and board[to_l][to_c] is None:
         return [[from_l, from_c], [to_l, to_c]]
@@ -47,7 +51,7 @@ def send_move(client, move):
 
     print("[COUP ENVOYE]", move)
 
-    
+
 def start_server():
     def handler():
         with socket.socket() as s:
@@ -81,6 +85,12 @@ def start_server():
                         packet = struct.pack("I", len(resp_data)) + resp_data
 
                         client.sendall(packet)
+
+                    elif msg["rerquest"] == "play":
+                        state = msg["state"]
+                        move = compute_move(state)
+                        send_move(client, move)
+
 
     thread = threading.Thread(target=handler, daemon=True)
     thread.start()
