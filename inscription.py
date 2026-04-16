@@ -3,7 +3,7 @@ import json
 import struct
 import threading
 
-HOST = "172.17.10.46" #taper l'IP 
+HOST = "172.17.10.130" #taper l'IP 
 PORT = 3000 
 CLIENT_PORT = 8888
 
@@ -17,6 +17,23 @@ def recvall(sock, n):
         data += packet
     return data
 
+def compute_move(state):
+    board = state["board"]
+    color = state["color"]
+
+    for l in range(8):
+        for c in range(8):
+            case = board[l][c]
+            if case and case["player"] == 1 and case["color"] == color:
+                from_l, from_c = l, c
+    
+    to_l = from_l - 1
+    to_c = from_c
+
+    if 0 <= to_l < 8 and board[to_l][to_c] is None:
+        return [[from_l, from_c], [to_l, to_c]]
+    
+    return [[from_l, from_c], [from_l, from_c]]
 
 def start_server():
     def handler():
