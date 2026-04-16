@@ -5,7 +5,7 @@ import threading
 
 HOST = "172.17.10.130" #taper l'IP 
 PORT = 3000 
-CLIENT_PORT = 8888
+CLIENT_PORT = 1111
 
 
 def recvall(sock, n):
@@ -25,8 +25,11 @@ def compute_move(msg):
     for l in range(8):
         for c in range(8):
             case = board[l][c]
-            if case and case[0] == 1 and case[1] == color:
+            if case and case[0] == 1 and (color is None or case[1] == color):
                 from_l, from_c = l, c
+    if from_l is None:
+        print("ERREUR: pion introuvable")
+        return [[0,0], [0,0]] #vérif pion là ?
     
     if state["current"] == 0:
         to_l = from_l - 1
@@ -36,7 +39,7 @@ def compute_move(msg):
         to_c = from_c
 
     if 0 <= to_l < 8 and board[to_l][to_c] is None:
-        return [[from_l, from_c], [to_l, to_c]]
+        return [[from_l, from_c], [to_l, to_c]] #case libre ?
     
     return [[from_l, from_c], [from_l, from_c]]
 
@@ -81,6 +84,7 @@ def start_server():
 
                     if msg["request"] == "ping":
                         response = {"response": "pong"}
+                        print(response)
 
                         resp_data = json.dumps(response).encode()
                         packet = struct.pack("I", len(resp_data)) + resp_data
@@ -89,8 +93,14 @@ def start_server():
 
                     elif msg["request"] == "play":
                         move = compute_move(msg)
-                        send_move(client, move)   
+                        send_move(client, move)  
 
+                    else:
+                        response = {"response" : "Waiting for ping or play"}
+                        resp_data = json.dumps(response) .encode()
+                        packet = struct.pack("I", len(resp_data)) + resp_data
+
+                        client.sendall(packet)
 
     thread = threading.Thread(target=handler, daemon=True)
     thread.start()
