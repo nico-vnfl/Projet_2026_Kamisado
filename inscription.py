@@ -3,8 +3,8 @@ import json
 import struct
 import threading
 
-HOST = "172.17.89.143"
-PORT = 3000
+HOST = "172.17.10.46" #taper l'IP 
+PORT = 3000 
 CLIENT_PORT = 8888
 
 
@@ -55,15 +55,16 @@ def start_server():
     thread = threading.Thread(target=handler, daemon=True)
     thread.start()
 
-
-def subscribe():
-    msg = {
+def subscribe_msg():
+    return {
         "request": "subscribe",
         "port": CLIENT_PORT,
-        "name": "Theo",
-        "matricules": ["12345"]
+        "name": "Nico",
+        "matricules": ["24350"]
     }
 
+def subscribe():
+    msg = subscribe_msg()
     data = json.dumps(msg).encode()
     packet = struct.pack("I", len(data)) + data
 
@@ -72,11 +73,14 @@ def subscribe():
         s.sendall(packet)
 
     print("INSCRIPTION ENVOYEE")
+    return msg
 
 
 # Lancement
-start_server()
-subscribe()
+if __name__ == "__main__":
+
+    start_server()
+    subscribe()
 
 # Boucle pour garder le programme actif
 while True:

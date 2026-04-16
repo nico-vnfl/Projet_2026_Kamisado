@@ -242,6 +242,8 @@ def show(state): #affiche l'état demandé
 	print(state[6:])
 	print()
 
+
+
 state = [
 	None, None, None,
 	None, None, None,
