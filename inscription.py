@@ -65,17 +65,16 @@ def send_move(client, move): #envoie le move en reponse
     if not isinstance(move,list): 
         print("[COUP INVALIDE]",move)
         move = [(0,0)], [(0,0)]
-        
+
     response = {
         "response":"move",
         "move": move
     }
 
-    response_data = json.dumps(response).encode()
-    packet = struct.pack("I", len(response_data)) + response_data
-    client.sendall(packet)
+    
+    client.sendall(make_packet(response))
 
-    print("[COUP ENVOYE]", move)
+    print("[COUP ENVOYE]", response)
 
 
 def start_server(): 
@@ -84,45 +83,38 @@ def start_server():
             s.bind(("0.0.0.0", CLIENT_PORT))
             s.listen()
 
-            print("Serveur local lancé sur 8888")
+            print(f"Serveur local lancé sur {CLIENT_PORT}")
 
             while True:
                 client, addr = s.accept()
                 with client:
+                    try:
+                        client.settimeout(2)
+                        print("[CONNEXION]", addr)
+                        msg = receive_message(client)
+                        if not msg: 
+                            print("[allo Huston ici la terre???]")
+                            continue
+                        print("[SERVEUR:]", msg)
 
-                    raw_len = recvall(client, 4)
-                    if not raw_len:
-                        continue
 
-                    msg_len = struct.unpack("I", raw_len)[0]
 
-                    data = recvall(client, msg_len)
-                    if not data:
-                        continue
-
-                    msg = json.loads(data.decode())
-
-                    print("[RECU DU SERVEUR]", msg)
-
-                    if msg["request"] == "ping":
-                        response = {"response": "pong"}
-                        print(response)
-
-                        resp_data = json.dumps(response).encode()
-                        packet = struct.pack("I", len(resp_data)) + resp_data
-                        client.sendall(packet)
+                        if msg["request"] == "ping":
+                            response = {"response": "pong"}
+                            print(response)
+                            client.sendall(packet)
                         
 
-                    elif msg["request"] == "play":
-                        move = compute_move(msg)
-                        send_move(client, move)  
+                        elif msg["request"] == "play":
+                            move = compute_move(msg)
+                            send_move(client, move)  
 
-                    else:
-                        response = {"response" : "Waiting for ping or play"}
-                        resp_data = json.dumps(response) .encode()
-                        packet = struct.pack("I", len(resp_data)) + resp_data
-
-                        client.sendall(packet)
+                        else:
+                            response = {"response" : "Waiting for ping or play"}
+                            client.sendall(make_packet(response))
+                    except Exception:
+                        print("[c'est pas ma faute c'est le serveur]")
+                        traceback.print_exc()
 
     thread = threading.Thread(target=handler, daemon=True)
     thread.start()
@@ -131,18 +123,15 @@ def subscribe_msg():
     return {
         "request": "subscribe",
         "port": CLIENT_PORT,
-        "name": "Nico",
-        "matricules": ["24350"]
+        "name": "LIB",
+        "matricules": ["24355"]
     }
 
 def subscribe():
     msg = subscribe_msg()
-    data = json.dumps(msg).encode()
-    packet = struct.pack("I", len(data)) + data
-
     with socket.socket() as s:
         s.connect((HOST, PORT))
-        s.sendall(packet)
+        s.sendall(make_packet(msg))
 
     print("INSCRIPTION ENVOYEE")
     return msg
