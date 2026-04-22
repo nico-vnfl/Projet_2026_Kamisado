@@ -2,10 +2,21 @@ import socket
 import json
 import struct
 import threading
+import traceback
+from IA import compute_move
 
 HOST = "172.17.10.130" #taper l'IP 
 PORT = 3000 
 CLIENT_PORT = 1111
+
+#transforme fct en message python: 
+def make_packet(message,length_in_bits=False):
+    message_data = json.dumps(message).encode()
+    message_length = len(message_data)
+    if length_in_bits:
+        message_length *= 8 #un octet tranformé en 8bit
+    return struct.pack("I",message_length) + message_data
+
 
 
 def recvall(sock, n):
