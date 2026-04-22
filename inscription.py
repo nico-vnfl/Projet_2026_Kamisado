@@ -28,7 +28,44 @@ def recvall(sock, n):
         data += packet
     return data
 
+def receive_message(sock):
+    len_brute = recvall(sock, 4)
+    if not len_brute:
+        return None
+    
+    len_prevu = struct.unpack("I", len_brute)[0]
+    data = b""
+
+    while len(data) < len_prevu:
+        try:
+            packet = sock.recv(len_prevu - len(data))
+        except TimeoutError:
+            break
+        if not packet:
+            break
+        data += packet
+
+        try:
+            return json.loads(data.decode())
+        except json.JSONDecodeError:
+            pass
+    if len_prevu % 8 == 0 and len(data) >= len_prevu // 8:
+        return json.loads(data[0 : len_prevu // 8].decode())
+
+    if data:
+        return json.loads(data.decode())
+    
+    return None
+
+
+
+
+
 def send_move(client, move): #envoie le move en reponse
+    if not isinstance(move,list): 
+        print("[COUP INVALIDE]",move)
+        move = [(0,0)], [(0,0)]
+        
     response = {
         "response":"move",
         "move": move
