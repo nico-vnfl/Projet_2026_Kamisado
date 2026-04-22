@@ -102,7 +102,7 @@ def start_server():
                         if msg["request"] == "ping":
                             response = {"response": "pong"}
                             print(response)
-                            client.sendall(packet)
+                            client.sendall(make_packet(response))
                         
 
                         elif msg["request"] == "play":
