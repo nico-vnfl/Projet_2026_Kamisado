@@ -1,6 +1,6 @@
 player_sides = {
-    0: "haut",
-    1: "bas",
+    0: "dark",
+    1: "light",
 }
 
 def tile_color(cell):
