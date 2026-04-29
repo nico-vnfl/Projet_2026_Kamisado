@@ -23,10 +23,13 @@ def generate_moves(board, forced_color, current_player):
     for row in range(8):
         for col in range(8):
             cell = board[row][col]
-            if piece(cell) and piece(cell)[1] != player_sides[current_player]:
+            current_piece = piece(cell)
+            if current_piece is None:
+                continue
+            if current_piece[1] != player_sides[current_player]:
                 continue
             if forced_color is not None:
-                if piece(cell) and piece(cell)[0] != forced_color:
+                if current_piece[0] != forced_color:
                     continue
 
             for diff_row, diff_col in directions:
