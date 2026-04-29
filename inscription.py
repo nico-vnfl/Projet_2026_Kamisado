@@ -9,6 +9,7 @@ HOST = "198.168.1.&" #taper l'IP
 PORT = 3000 
 CLIENT_PORT = 1111
 
+
 #transforme fct en message python: 
 def make_packet(message,length_in_bits=False):
     message_data = json.dumps(message).encode()
