@@ -5,7 +5,7 @@ import threading
 import traceback
 from IA import compute_move
 
-HOST = "172.17.10.130" #taper l'IP 
+HOST = "198.168.1.&" #taper l'IP 
 PORT = 3000 
 CLIENT_PORT = 1111
 
