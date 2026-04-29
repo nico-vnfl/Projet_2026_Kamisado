@@ -89,3 +89,4 @@ def test_subscribe_msg():
     assert "port" in msg
     assert "name" in msg
     assert "matricules" in msg
+    
