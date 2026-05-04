@@ -5,9 +5,9 @@ import threading
 import traceback
 from IA import compute_move
 
-HOST = "198.168.1.&" #taper l'IP 
+HOST = "192.168.1.104" #taper l'IP 
 PORT = 3000 
-CLIENT_PORT = 1111
+CLIENT_PORT = 2222
 
 
 #transforme fct en message python: 
