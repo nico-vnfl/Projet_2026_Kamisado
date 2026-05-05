@@ -1,8 +1,8 @@
 from time import perf_counter
-from moves import generate_moves, piece, player_sides , tile_color
+from moves import generate_moves, piece, player_sides, tile_color
 
-MAX_DEPTH = 16
-TIME_LIMIT_SECONDS = 2.8
+MAX_DEPTH = 40
+TIME_LIMIT_SECONDS = 3
 SCORE = 1_000_000
 
 class SearchTimeout(Exception):
@@ -37,13 +37,21 @@ def negamax(board, color, player, depth, alpha, beta, deadline):
         return utility(board, player), None
 
     legal_moves = moves(board, color, player)
+    if not legal_moves and color is not None:
+        pass_move = get_pass_move(board, color, player)
+        if depth <= 0:
+            return evaluation(board, player), pass_move
+        new_board, new_color = apply(board, pass_move)
+        value, _ = negamax(new_board, new_color, 1 - player, depth - 1, -beta, -alpha, deadline)
+        return -value, pass_move
+
     if depth == 0 or not legal_moves:
         return evaluation(board, player), None
 
     best_value = float("-inf")
     best_move = None
 
-    for move in order_moves(board, legal_moves, player):
+    for move in order_moves(legal_moves, player):
         new_board, new_color = apply(board, move)
         value, _ = negamax(new_board, new_color, 1 - player, depth - 1, -beta, -alpha, deadline)
         value = -value
@@ -72,12 +80,21 @@ def apply(board, move):
     start, end = move
     new_board = clone_board(board)
 
-    moving_piece = new_board[start[0]][start[1]][1]
-    new_board[start[0]][start[1]][1] = None
-    new_board[end[0]][end[1]][1] = moving_piece
+    if start != end:
+        moving_piece = new_board[start[0]][start[1]][1]
+        new_board[start[0]][start[1]][1] = None
+        new_board[end[0]][end[1]][1] = moving_piece
 
     return new_board, tile_color(new_board[end[0]][end[1]])
 
+def get_pass_move(board, color, player):
+    side = player_sides[player]
+    for row in range(8):
+        for col in range(8):
+            p = piece(board[row][col])
+            if p is not None and p[1] == side and (color is None or p[0] == color):
+                return [[row, col], [row, col]]
+    return [[0, 0], [0, 0]]
 
 def gameOver(board):
     return get_winner(board) is not None
@@ -101,6 +118,7 @@ def evaluation(board, player):
 def score_player(board, player):
     side = player_sides[player]
     direction = -1 if player == 0 else 1
+    goal_row = 0 if player == 0 else 7
     score = 0
 
     for row in range(8):
@@ -118,10 +136,25 @@ def score_player(board, player):
             if 0 <= next_row < 8 and piece(board[next_row][col]) is None:
                 score += 15
 
+            steps = abs(row - goal_row)
+            if steps > 0:
+                
+                clear = all(piece(board[row + direction * dr][col]) is None
+                            for dr in range(1, steps + 1))
+                if clear:
+                    score += (9 - steps) * 150
+
+                for dc in(-1, 1):
+                    ok = all(0 <= col + dc * dr < 8 and
+                             piece(board[row + direction * dr][col + dc * dr]) is None
+                             for dr in range(1, steps + 1))
+                    if ok:
+                        score += (9 - steps) * 100
+
     return score
 
 
-def order_moves(board, legal_moves, player):
+def order_moves(legal_moves, player):
     direction = -1 if player == 0 else 1
     goal_row = 0 if player == 0 else 7
 
@@ -153,13 +186,15 @@ def get_winner(board):
 
 
 def choix_move(legal_moves, current):
-    return order_moves(None, legal_moves, int(current))[0]
+    return order_moves(legal_moves, int(current))[0]
 
 
 def move_secours(board, player, color=None):
     legal_moves = moves(board, color, player)
     if legal_moves:
-        return order_moves(board, legal_moves, player)[0]
+        return order_moves(legal_moves, player)[0]
+    if color is not None:
+        return get_pass_move(board, color, player)
     return [[0, 0], [0, 0]]
 
 def ensure_legal_move(state, move):
@@ -171,5 +206,7 @@ def ensure_legal_move(state, move):
     if move in legal_moves:
         return move
     if legal_moves:
-        return order_moves(board, legal_moves, player)[0]
+        return order_moves(legal_moves, player)[0]
+    if color is not None:
+        return get_pass_move(board, color, player)
     return [[0, 0], [0, 0]]
