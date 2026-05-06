@@ -98,5 +98,4 @@ Les tests couvrent la génération des coups, l'évaluation, le tri, les cas de 
 
 - 24350 VANNUFFEL NICOLAS
 - 24355 LIBERT THEO
-- [matricule à compléter]
 <img width="1080" height="810" alt="IMG_7562" src="https://github.com/user-attachments/assets/f5011cc2-9fbd-4c57-8e6b-b39883e9a4a7" />
